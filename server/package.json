@@ -1,0 +1,21 @@
+{
+  "name": "freshers-portal-server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "seed": "node utils/seed.js",
+    "create-admin": "node utils/createAdmin.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.2.0",
+    "dotenv": "^16.0.3",
+    "bcrypt": "^5.1.0",
+    "jsonwebtoken": "^9.0.0",
+    "cors": "^2.8.5",
+    "axios": "^1.3.2",
+    "nodemailer": "^6.9.9",
+    "node-cron": "^3.0.3"
+  }
+}
