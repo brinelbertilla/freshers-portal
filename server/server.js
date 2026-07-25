@@ -1,4 +1,3 @@
-
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -33,29 +32,6 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Freshers Portal API is running' });
 });
 
-// TEMPORARY DEBUG ROUTE — remove after diagnosing the DB_HOST/ETIMEDOUT issue.
-// This tests the SAME pool object your real routes use (not a fresh connection),
-// to check if the pool itself is stuck vs. a plain connection working fine.
-app.get('/api/debug-db', async (req, res) => {
-  const mask = (v) => (v ? `${v.slice(0, 3)}***(len:${v.length})` : '(empty)');
-  const info = {
-    DB_HOST: JSON.stringify(process.env.DB_HOST),
-    DB_PORT: JSON.stringify(process.env.DB_PORT),
-    DB_USER: mask(process.env.DB_USER),
-    DB_NAME: JSON.stringify(process.env.DB_NAME),
-    DB_SSL: JSON.stringify(process.env.DB_SSL),
-    DB_PASSWORD_length: process.env.DB_PASSWORD ? process.env.DB_PASSWORD.length : 0
-  };
-
-  try {
-    const pool = (await import('./config/db.js')).default;
-    const [rows] = await pool.query('SELECT 1 as ok');
-    res.json({ envSeen: info, poolConnection: 'SUCCESS', rows });
-  } catch (err) {
-    res.json({ envSeen: info, poolConnection: 'FAILED', error: err.message, code: err.code });
-  }
-});
-
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
@@ -66,3 +42,4 @@ app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
   startNotificationScheduler();
 });
+
