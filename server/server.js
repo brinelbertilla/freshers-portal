@@ -1,3 +1,4 @@
+
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -33,6 +34,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // TEMPORARY DEBUG ROUTE — remove after diagnosing the DB_HOST/ETIMEDOUT issue.
+// This tests the SAME pool object your real routes use (not a fresh connection),
+// to check if the pool itself is stuck vs. a plain connection working fine.
 app.get('/api/debug-db', async (req, res) => {
   const mask = (v) => (v ? `${v.slice(0, 3)}***(len:${v.length})` : '(empty)');
   const info = {
@@ -45,21 +48,11 @@ app.get('/api/debug-db', async (req, res) => {
   };
 
   try {
-    const mysql = await import('mysql2/promise');
-    const conn = await mysql.default.createConnection({
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : undefined,
-      connectTimeout: 8000
-    });
-    await conn.query('SELECT 1');
-    await conn.end();
-    res.json({ envSeen: info, connection: 'SUCCESS' });
+    const pool = (await import('./config/db.js')).default;
+    const [rows] = await pool.query('SELECT 1 as ok');
+    res.json({ envSeen: info, poolConnection: 'SUCCESS', rows });
   } catch (err) {
-    res.json({ envSeen: info, connection: 'FAILED', error: err.message, code: err.code });
+    res.json({ envSeen: info, poolConnection: 'FAILED', error: err.message, code: err.code });
   }
 });
 
