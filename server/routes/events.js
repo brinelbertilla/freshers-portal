@@ -130,8 +130,8 @@ router.post('/:id/register', verifyToken('student'), async (req, res) => {
     }
 
     await pool.query(
-      'INSERT INTO registrations (student_id, item_type, item_id, team_name, members) VALUES (?, "event", ?, ?, ?)',
-      [req.user.id, req.params.id, event.requires_team ? team_name.trim() : null, JSON.stringify(members)]
+      'INSERT INTO registrations (student_id, item_type, item_id, team_name, members) VALUES (?, ?, ?, ?, ?)',
+      [req.user.id, 'event', req.params.id, event.requires_team ? team_name.trim() : null, JSON.stringify(members)]
     );
     res.status(201).json({ message: 'Registered successfully' });
   } catch (err) {
